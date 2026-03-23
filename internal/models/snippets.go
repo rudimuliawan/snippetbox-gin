@@ -52,7 +52,6 @@ func (m *SnippetModel) Latest() ([]Snippet, error) {
 	ctx := context.Background()
 
 	snippets, err := gorm.G[Snippet](m.DB).
-		Where("id = ?", 2).
 		Order("ID DESC").
 		Limit(10).
 		Find(ctx)

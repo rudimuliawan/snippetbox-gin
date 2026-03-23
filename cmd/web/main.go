@@ -4,15 +4,19 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"text/template"
 
+	"github.com/go-playground/form/v4"
 	"github.com/rudimuliawan/snippetbox-gin/internal/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 type application struct {
-	logger  *slog.Logger
-	snippet *models.SnippetModel
+	logger        *slog.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -27,9 +31,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := &application{
-		logger:  logger,
-		snippet: &models.SnippetModel{DB: db},
+		logger:        logger,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
+		formDecoder:   form.NewDecoder(),
 	}
 
 	r := app.Setup()
